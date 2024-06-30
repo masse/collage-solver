@@ -138,7 +138,7 @@ The scoring consists of three weighted values - total canvas coverage, relative 
 finally how centered a featured image is. By tweaking the relative weight och each of these scoring weight factors you can control which
 property is most important.
 
-[^1]  ["J. Fan,Photo Layout with a Fast Evaluation Method and Genetic Algorithm"](https://ieeexplore.ieee.org/document/6266273),  
+[^1]: ["J. Fan,Photo Layout with a Fast Evaluation Method and Genetic Algorithm"](https://ieeexplore.ieee.org/document/6266273),  
 2012 IEEE International Conference on Multimedia and Expo Workshops, Melbourne, VIC, Australia, 2012, pp. 308-313,
 doi: 10.1109/ICMEW.2012.59.
 
