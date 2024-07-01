@@ -42,26 +42,26 @@ class Collage : CliktCommand() {
             helpFormatter = { MordantHelpFormatter(it, showDefaultValues = true) }
         }
     }
-
     private val defaults = CollageConfig()
+
     private val path by argument(help = "Path to a directory containing source images (png and jpeg supported)")
         .path(mustExist = true, canBeFile = false, mustBeReadable = true)
+
     private val featureImages: List<FeatureImage> by argument()
         .multiple()
         .transformAll { featureImageList -> featureImageList.map { FeatureImageArgumentParser.parse(it) } }
         .help(
-            """"Feature image filename(s) and the desired relative size e.g 
-            |... sunny_day.jpg:5 ... 
+            """Featured image filename(s) and their desired relative size e.g:${"\u0085"} 
+            |... sunny_day.jpg:5 ...${"\u0085"}
             |The relative size weight determines how large an image should be in the 
-            |output image compared to other images (whose relative image size factor by default is 1).
-            """.trimMargin()
-        )
+            |output image compared to other images (The default relative of an image is 1).
+            """.trimMargin())
 
     private val outputName by option(
         "-o",
         "--output",
-        help = "image output name without extension, defaults to the directory name of path argument"
-    )
+        help = "Image output name without extension, defaults to the directory name of path argument")
+
     private val targetWidth by option("-w", "--target-width")
         .int()
         .restrictTo(min = 1)
@@ -83,7 +83,7 @@ class Collage : CliktCommand() {
     private val borderColor: Color by option("-bc", "--border-color")
         .convert { it.toColor() }
         .default(defaults.borderColor)
-        .help("Border color in the form of a hexadecimal rgb string (like #ffffff for white)")
+        .help("Border color in the form of a hexadecimal rgb string (like ffffff for white)")
 
     private val maxScaleFactor by option("-msf", "--max-scale-factor")
         .double()
@@ -95,7 +95,7 @@ class Collage : CliktCommand() {
         .int()
         .restrictTo(min = 1)
         .default(defaults.populationSize)
-        .help("Population size")
+        .help("Population size, larger means better quality but longer generation time")
 
     private val generations by option("-gen", "--generations")
         .int()
@@ -112,16 +112,16 @@ class Collage : CliktCommand() {
     private val canvasCoverageWeight by option("-cc", "--canvas-coverage")
         .double()
         .default(defaults.scoringFactors.canvasCoverage).help(
-            """The weight factor for the canvas area coverage fitness score - or in other words, how important is it that the final image 
-            |is completely covered by the images (without any gaps etc)
+            """The weight factor for the canvas coverage fitness score - or how important 
+                |is it that the final image is completely covered by images (without any gaps etc)
             """.trimMargin()
         )
 
     private val relativeAreaCoverageWeight by option("-rac", "--relative-area-coverage")
         .double()
         .default(defaults.scoringFactors.relativeAreaCoverage).help(
-            """The weight factor for relative image size preservation fitness score - or in other words, how important is it that 
-                |the each image's relative size is preserved in the output image.
+            """The weight factor for relative image size preservation fitness score - or how important
+                | is it that the each image's relative size is preserved in the output image.
             """.trimMargin()
         )
 
