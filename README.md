@@ -10,16 +10,16 @@ You need to have [JDK 21](https://openjdk.org/) or higher installed, then run th
 
 If the build step was successful you can then run the program using the created scripts ```build/dist/collage-solver```
 or ```build/dist/collage-solver.bat``` if
-you are running Windows. To try it out there are 87 sample images included in the ```docs/sample-images```  directory.
+you are running Windows. To try it out there are sample images included in the ```docs/sample-images``` directory.
 There are sensible default for all options and the only mandatory argument is the path to a directory
-with the images you wish to create a collage. To create an example collage with one image featured you can try running:
+with the images you wish to create a collage. To create an example collage with a featured image you can try running:
 
 ```
-./build/dist/collage-solver docs/sample-images surikat.jpg:8"
+./build/dist/collage-solver docs/sample-images surikat.jpg:8
 ```
 
-This command will create a  ```sample-images.png``` in the current directory looking something like the following image.
-Your result will differ as this is an inherent property (pun intended!) of the genetic algorithm, however it should have the image of a
+This command will create a ```sample-images.png``` in the current directory looking something like the following image.
+Your result will differ as this is an inherent property (pun intended!) of the genetic algorithm - however it should have the image of a
 surikat stand out.
 
 ![Sample image output of collage-solver](docs/test-collage-output.png)
@@ -140,10 +140,14 @@ The steps of a GA are basically the same regardless of the type of problem you'r
 
 One iteration corresponds to one generation. Crossbreeding in this context means that an offspring
 of two parents will be a mix of the layout nodes from each parents trees. The mutate operation will randomly swap either the layout
-direction of a random layout node - or the image of two nodes. This will help the algorithm to escape a local optima.
-The scoring consists of three weighted values - total canvas coverage, relative preservation of each image dimension and
-finally how centered a featured image is. By tweaking the relative weight och each of these scoring weight factors you can control which
-property is most important.
+direction (horizontal or vertical) of a random layout node - or the image of two image nodes. This will help the algorithm to escape
+local optima. The fitness scoring value is the sum of three score values:
+
+- Total canvas coverage
+- Individual image nodes relative size fulfillment
+- How centered a featured image is.
+
+By tweaking the relative weight och each of these score values you can control which how prioritized that property is in the algorithm.
 
 [^1]: ["J. Fan,Photo Layout with a Fast Evaluation Method and Genetic Algorithm"](https://ieeexplore.ieee.org/document/6266273),  
 2012 IEEE International Conference on Multimedia and Expo Workshops, Melbourne, VIC, Australia, 2012, pp. 308-313,
