@@ -8,27 +8,26 @@ You need to have [JDK 21](https://openjdk.org/) or higher installed, then run th
 ./gradlew installDist
 ```
 
-If the build step was successful you can then run the program using the created scripts ```build/dist/collage-solver```
-or ```build/dist/collage-solver.bat``` if
-you are running Windows. To try it out there are sample images included in the ```docs/sample-images``` directory.
-There are sensible default for all options and the only mandatory argument is the path to a directory
-with the images you wish to create a collage. To create an example collage with a featured image you can try running:
+When the build step is complete, you can then run the program using the created scripts ```build/dist/collage-solver```
+or ```build/dist/collage-solver.bat``` if you are running Windows. 
+To try it out, sample images are included in the ```docs/sample-images``` directory.
+The program offers sensible default values for all options. The only required argument is the path to a directory 
+containing the images you want to use for the collage. To create a sample collage with a featured image, try running:
 
 ```
 ./build/dist/collage-solver docs/sample-images surikat.jpg:8
 ```
 
-This command will create a ```sample-images.png``` in the current directory looking something like the following image.
-Your result will differ as this is an inherent property (pun intended!) of the genetic algorithm - however it should have the image of a
-surikat stand out.
+This command will create a ```sample-images.png``` file in the current directory, looking something like the image below. 
+Due to the nature of genetic algorithms, your results will vary, but the surikat image should be prominent.
 
 ![Sample image output of collage-solver](docs/test-collage-output.png)
 
 ## Options
 
-When creating collages you will most likely want to customize more of the available options - like a custom output size other
-than the default 1920 x 1080. By tweaking the different weight factors you can alter the properties of the generated image.
-To see all available options simply run:
+You can customize many aspects of your collages, such as output size (default: 1920x1080). 
+By adjusting weight factors, you can fine-tune the generated image's appearance. 
+To see all available options, run:
 
 ```
 ./build/dist/collage-solver --help
@@ -67,19 +66,16 @@ I found that a good work process is to run the image generation several times an
 - Always specify your desired target output size (```-w <width> -h <height>```) from the start before changing any other options as the
   output
   dimension is a key factor of the algorithm.
-- If you find that there are large gaps in the finished output, most likely the output size is too large in relation to the combined images
-  sizes. Use more images or decrease the output size.
-- Use a higher population setting instead of the default 1000. It will take a bit longer to run but will almost always improve the results.
-- If you in the console output can see that the scoring keeps improving through all generations you may wish run the program longer. Default
-  is 500 generations.
-- Tweak the weight factors and observe the changes by running the program iteratively. Please note that the weight factors "compete" in
-  relation to each other so there is no use in for example doubling all three and expecting that all three properties should improve.
+- If your collage has large gaps, the output size might be too large relative to your images. Add more images or reduce the output size.
+- Increasing the population from the default 1000 can improve results, though it increases processing time.
+- Monitor the console output for score improvement. If scores steadily increase, consider extending the default 500 generations running time.
+- Experiment with weight factors to see their effects. Remember, weight factors compete, so adjusting one often impacts others. Avoid uniformly increasing all weights.
 
 ## Background
 
-As many others I have a lot of digital photos from holidays and events with friends and family.
-I thought it would be fun to arrange them in a collage to create some large posters and then have them printed and in the end creating a "
-wall size" collage of images.
+Like many people, I've accumulated a vast collection of digital photos from countless holidays and gatherings with friends and family. 
+I thought it would be exciting to transform these memories into stunning collages, print them as large posters, and ultimately create 
+an impressive, wall-sized artwork.
 
 I started doing this manually in a photo editing program, but soon gave up as it was taking forever...
 Next I tried scripting a combination of [ImageMagick](https://imagemagick.org/) plugins to try to automate things, and it kind of worked,
@@ -87,67 +83,62 @@ but the result was not
 very good-looking, with very repetitive patterns of layouts and either overlapping or irritating gaps between individual images.
 I found some commercial alternatives, but none of them really seemed to be able to create collages with that many images.
 
-I later stumbled upon a paper by Jian Fan [^1] that presented a way create collages by using a genetic algorithm (GA). I knew some of the
-basic principles of GA, but have never
-really used them for anything beyond very simple examples, so developing this application has been fun and educating.
-The code in this repo is inspired by the general algorithm presented in Jian Fan's paper with some additions such as the ability to control
-the centering of a featured image with a new fitness metric.
+Later, I discovered a paper by Jian Fan [^1] outlining a genetic algorithm (GA) approach to collage creation. While familiar with GA concepts, 
+I hadn't applied them to complex problems before. This project was both enjoyable and informative. 
+The code in this repository is based on Fan's algorithm, with enhancements like a new fitness metric for centered featured images.
 
-In this context - for a collage layout to be considered valid it must fulfill the following basic constraints:
+To be considered valid, a collage layout must adhere to the following fundamental restrictions:
 
-- It should handle images with different dimensions and aspect ratios.
-- An image may be scaled down (while maintaining its original aspect ratio).
-- Images may not be cropped or rotated.
-- Images may not overlap other images.
-- All images must fit inside the defined canvas target size.
+- Image variability: Accommodate images with diverse dimensions and aspect ratios.
+- Image scaling: Allow for image downscaling while preserving original proportions.
+- Image integrity: Maintain image integrity by prohibiting cropping and rotation.
+- Spatial constraints: Prevent image overlap and ensure all images fit within the specified canvas.
 
-Creating a layout that fulfills these constraints is actually not that hard and the first part of the algorithm does precisely that.
-Construct a population consisting of *n* scored individuals that fulfills the basic constraints listed using a naive slicing algorithm that
-recursively divides the target canvas with random horizontal and vertical cuts.
+Generating layouts that satisfy these constraints is relatively straightforward. The initial phase of the algorithm accomplishes 
+this by constructing a population of *n* scored individuals. 
+A naive slicing algorithm recursively divides the target canvas with random horizontal and vertical cuts,
+creating a [full binary tree](https://en.wikipedia.org/wiki/Binary_tree) structure.
+Source images are then randomly assigned to the resulting leaf nodes. In GA terminology, this layout tree represents an *individual* within the *population*, 
+with its unique node structure analogous to *genes* or *chromosomes*. Leaf nodes are referred to as *image nodes*, while internal nodes are *layout nodes*.
 
-It then randomly place each source image in the created leaf node slots - thereby creating
-a [full binary tree](https://en.wikipedia.org/wiki/Binary_tree)
-structure.
-Leaf nodes in the tree are hereafter referred to as "image nodes" and the internal nodes of the tree are called "layout nodes".
-In GA lingo this layout tree is our representation of an *individual* in the *population* and the unique structure of its nodes can be
-thought of as its
-*genes* or *chromosomes*.
+While creating a layout that meets the basic constraints is achievable, generating an aesthetically pleasing collage requires additional considerations:
 
-But for a collage to be aesthetically pleasing we also want to:
+- Space optimization: Minimize empty spaces or gaps within the canvas.
+- Featured image prominence: Highlight specific images by allocating them larger areas.
+- Centered featured images: Optionally position featured images closer to the canvas center (when combined with image prominence).
 
-1. Minimize any gaps or unused space in the target canvas.
-2. Select "featured" images that are more prominently displayed by being relatively larger than other images.
-3. Optionally have featured images near the center (only applicable in combination with 2)
+ndeed, the problem rapidly escalates from a simple constraint satisfaction task to a complex optimization challenge. As stated in the paper:
 
-Suddenly - the problem is not trivial at all! Or as described in the paper:
 > "a NP-complete combinatorial optimization problem. An
 > exhaustive search is impractical even for a modest number of photos"
 
-This is where the use of [genetic algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm) (GA) comes into play, as it allow us to
-gradually improve a solution mimicking evolution by natural selection. In order to select parents to be allowed to spawn the next generation
-we need a quantifiable metric or *fitness score* as it's called in GA. In this case we actually have three metrics, one for each of the
-three listed traits above.
-These metrics combined constitutes an individuals fitness score (in our case a low score means better fitness)
+This is where [genetic algorithms](https://en.wikipedia.org/wiki/Genetic_algorithm) (GA) excel. By simulating natural selection, GA allows us to iteratively improve solutions. 
+To guide this process, we need a quantifiable measure, or fitness score. In this case, we employ three metrics, each addressing a 
+specific aesthetic goal: minimizing gaps, maximizing featured image prominence, and centering featured images. 
+These metrics are combined to produce an overall fitness score (lower scores indicate better fitness in this algorithm).
 
-## Algorithm
+## Steps in a Genetic Algorithm
 
-The steps of a GA are basically the same regardless of the type of problem you're trying to solve.
+The core steps of a genetic algorithm are remarkably consistent across different problem domains.
 
-1. Select fittest individuals in the population.
-2. Crossbreed selected individuals to create next generation.
-3. Mutate (a proportion of) of the individuals in the population.
-4. Score each individual and start over at step 1.
+- Selection: Choosing individuals with the highest fitness scores to become parents of the next generation.
+- Crossover: Combining genetic material (in this case, layout information) from selected parents to create offspring.
+- Mutation: Introducing random changes to the offspring's genetic makeup to maintain diversity.
+- Evaluation: Assessing the fitness of the new population and repeating the process.
+  
+While the specific implementation of these steps can vary widely, the underlying principles remain constant.
 
-One iteration corresponds to one generation. Crossbreeding in this context means that an offspring
-of two parents will be a mix of the layout nodes from each parents trees. The mutate operation will randomly swap either the layout
-direction (horizontal or vertical) of a random layout node - or the image of two image nodes. This will help the algorithm to escape
-local optima. The fitness scoring value is the sum of three score values:
+Each iteration of the algorithm represents a new generation. Offspring are created by combining layout nodes from two parent individuals. 
+Mutation introduces random changes, either altering the orientation of a layout node or swapping two images. 
+This helps the algorithm explore diverse solutions and avoid suboptimal results. 
+The fitness of an individual is determined by a weighted sum of three factors:
 
-- Total canvas coverage
-- Individual image nodes relative size fulfillment
-- How centered a featured image is.
+- Canvas coverage: How well the images fill the available space.
+- Image size fulfillment: How closely image sizes match their desired proportions.
+- Featured image centrality: How centered the featured image is within the collage.
 
-By tweaking the relative weight och each of these score values you can control which how prioritized that property is in the algorithm.
+It is by adjusting the weights assigned to these factors that you can prioritize specific aesthetic goals.
+Have fun with it!
 
 [^1]: ["J. Fan,Photo Layout with a Fast Evaluation Method and Genetic Algorithm"](https://ieeexplore.ieee.org/document/6266273),  
 2012 IEEE International Conference on Multimedia and Expo Workshops, Melbourne, VIC, Australia, 2012, pp. 308-313,
