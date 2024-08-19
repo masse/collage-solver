@@ -107,7 +107,7 @@ While creating a layout that meets the basic constraints is achievable, generati
 - Featured image prominence: Highlight specific images by allocating them larger areas.
 - Centered featured images: Optionally position featured images closer to the canvas center (when combined with image prominence).
 
-ndeed, the problem rapidly escalates from a simple constraint satisfaction task to a complex optimization challenge. As stated in the paper:
+Now the problem rapidly escalates from a simple constraint satisfaction task to a complex optimization challenge! As stated in the paper:
 
 > "a NP-complete combinatorial optimization problem. An
 > exhaustive search is impractical even for a modest number of photos"
