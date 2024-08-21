@@ -8,18 +8,18 @@ You need to have [JDK 21](https://openjdk.org/) or higher installed, then run th
 ./gradlew installDist
 ```
 
-When the build step is complete, you can then run the program using the created scripts ```build/dist/collage-solver```
-or ```build/dist/collage-solver.bat``` if you are running Windows. 
+When the build step is complete, you can then run the program using the created scripts ```./build/install/collage-solver/bin/collage-solver```
+or ```./build/install/collage-solver/bin/collage-solver.bat``` if you are running Windows.
 To try it out, sample images are included in the ```docs/sample-images``` directory.
 The program offers sensible default values for all options. The only required argument is the path to a directory 
 containing the images you want to use for the collage. To create a sample collage with a featured image, try running:
 
 ```
-./build/dist/collage-solver docs/sample-images surikat.jpg:8
+./build/install/collage-solver/bin/collage-solver docs/sample-images surikat.jpg:8
 ```
 
 This command will create a ```sample-images.png``` file in the current directory, looking something like the image below. 
-Due to the nature of genetic algorithms, your results will vary, but the surikat image should be prominent.
+Due to the nature of genetic algorithms, your results will vary, but an image of a surikat should be prominent.
 
 ![Sample image output of collage-solver](docs/test-collage-output.png)
 
@@ -30,7 +30,7 @@ By adjusting weight factors, you can fine-tune the generated image's appearance.
 To see all available options, run:
 
 ```
-./build/dist/collage-solver --help
+./build/install/collage-solver/bin/collage-solver --help
 ```
 
 ```

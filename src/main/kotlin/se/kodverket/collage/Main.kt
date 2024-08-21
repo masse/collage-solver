@@ -42,6 +42,7 @@ class Collage : CliktCommand() {
             helpFormatter = { MordantHelpFormatter(it, showDefaultValues = true) }
         }
     }
+
     private val defaults = CollageConfig()
 
     private val path by argument(help = "Path to a directory containing source images (png and jpeg supported)")
@@ -55,12 +56,14 @@ class Collage : CliktCommand() {
             |... sunny_day.jpg:5 ...${"\u0085"}
             |The relative size weight determines how large an image should be in the 
             |output image compared to other images (The default relative of an image is 1).
-            """.trimMargin())
+            """.trimMargin()
+        )
 
     private val outputName by option(
         "-o",
         "--output",
-        help = "Image output name without extension, defaults to the directory name of path argument")
+        help = "Image output name without extension, defaults to the directory name of path argument"
+    )
 
     private val targetWidth by option("-w", "--target-width")
         .int()

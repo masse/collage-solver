@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.10"
     application
     id("org.jmailen.kotlinter") version "4.3.0"
 }
@@ -12,10 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC.2")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     testImplementation(kotlin("test"))
-    implementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 }
 
 tasks.test {
