@@ -19,7 +19,10 @@ data class CollageConfig(
     val scoringFactors: ScoringFactors = ScoringFactors(),
 )
 
-data class FeatureImage(val name: String, val relativeWeight: Int) {
+data class FeatureImage(
+    val name: String,
+    val relativeWeight: Int,
+) {
     init {
         require(name.isNotEmpty()) { "Image name must not be empty" }
         require(relativeWeight > 0) { "Relative weight must be greater than 0" }
@@ -30,7 +33,8 @@ object FeatureImageArgumentParser {
     val pattern = Regex("(.+):(\\d+)")
 
     fun parse(input: String): FeatureImage =
-        pattern.matchEntire(input)
+        pattern
+            .matchEntire(input)
             ?.destructured
             ?.let { (name, weight) ->
                 FeatureImage(name, weight.toInt())

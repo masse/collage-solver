@@ -6,7 +6,9 @@ import java.awt.Font
 import java.awt.image.BufferedImage
 import se.kodverket.collage.layoutsolver.LayoutSolution
 
-class BinaryTreeDebugRenderer(override val solution: LayoutSolution) : BinaryTreeImageRenderer(solution) {
+class BinaryTreeDebugRenderer(
+    override val solution: LayoutSolution,
+) : BinaryTreeImageRenderer(solution) {
     override fun renderNode(
         image: BufferedImage,
         renderNode: RenderNode,

@@ -28,9 +28,7 @@ class UtilTest {
 
     @Test
     fun testConcurrently() {
-        fun testOperation(input: Int): String {
-            return "Result: $input"
-        }
+        fun testOperation(input: Int): String = "Result: $input"
 
         val inputList = listOf(1, 2, 3)
 

@@ -91,12 +91,20 @@ class LayoutNodeTest {
         layoutNode.dimension.height shouldBe 800.0.plusOrMinus(0.001)
 
         imageNode1.sourceImage.aspectRatio shouldBe layoutNode.left.aspectRatio.plusOrMinus(0.001)
-        imageNode1.sourceImage.dimension.width shouldBe layoutNode.left.dimension.width.plusOrMinus(0.001)
-        imageNode1.sourceImage.dimension.height shouldBe layoutNode.left.dimension.height.plusOrMinus(0.001)
+        imageNode1.sourceImage.dimension.width shouldBe
+            layoutNode.left.dimension.width
+                .plusOrMinus(0.001)
+        imageNode1.sourceImage.dimension.height shouldBe
+            layoutNode.left.dimension.height
+                .plusOrMinus(0.001)
 
         imageNode2.sourceImage.aspectRatio shouldBe layoutNode.right.aspectRatio.plusOrMinus(0.001)
-        imageNode2.sourceImage.dimension.width shouldBe layoutNode.right.dimension.width.plusOrMinus(0.001)
-        imageNode2.sourceImage.dimension.height shouldBe layoutNode.right.dimension.height.plusOrMinus(0.001)
+        imageNode2.sourceImage.dimension.width shouldBe
+            layoutNode.right.dimension.width
+                .plusOrMinus(0.001)
+        imageNode2.sourceImage.dimension.height shouldBe
+            layoutNode.right.dimension.height
+                .plusOrMinus(0.001)
     }
 
     @Test
@@ -114,12 +122,20 @@ class LayoutNodeTest {
         layoutNode.dimension.height shouldBe 400.0.plusOrMinus(0.001)
 
         imageNode1.sourceImage.aspectRatio shouldBe layoutNode.left.aspectRatio
-        imageNode1.sourceImage.dimension.width shouldBe layoutNode.left.dimension.width.plusOrMinus(0.001)
-        imageNode1.sourceImage.dimension.height shouldBe layoutNode.left.dimension.height.plusOrMinus(0.001)
+        imageNode1.sourceImage.dimension.width shouldBe
+            layoutNode.left.dimension.width
+                .plusOrMinus(0.001)
+        imageNode1.sourceImage.dimension.height shouldBe
+            layoutNode.left.dimension.height
+                .plusOrMinus(0.001)
 
         imageNode2.sourceImage.aspectRatio shouldBe layoutNode.right.aspectRatio.plusOrMinus(0.001)
-        imageNode2.sourceImage.dimension.width shouldBe layoutNode.right.dimension.width.plusOrMinus(0.001)
-        imageNode2.sourceImage.dimension.height shouldBe layoutNode.right.dimension.height.plusOrMinus(0.001)
+        imageNode2.sourceImage.dimension.width shouldBe
+            layoutNode.right.dimension.width
+                .plusOrMinus(0.001)
+        imageNode2.sourceImage.dimension.height shouldBe
+            layoutNode.right.dimension.height
+                .plusOrMinus(0.001)
     }
 
     @Test

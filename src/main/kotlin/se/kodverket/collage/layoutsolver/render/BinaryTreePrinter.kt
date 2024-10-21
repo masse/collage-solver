@@ -5,7 +5,9 @@ import se.kodverket.collage.layoutsolver.ImageNode
 import se.kodverket.collage.layoutsolver.LayoutNode
 import se.kodverket.collage.layoutsolver.Node
 
-class BinaryTreePrinter(private val tree: Node) {
+class BinaryTreePrinter(
+    private val tree: Node,
+) {
     fun print(ps: PrintStream) = ps.println("Binary Tree: ${traversePreOrder(tree)}")
 
     private fun traversePreOrder(root: Node?): String {

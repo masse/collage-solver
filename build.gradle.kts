@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.0.10"
+    kotlin("jvm") version "2.0.21"
     application
-    id("org.jmailen.kotlinter") version "4.3.0"
+    id("org.jmailen.kotlinter") version "4.4.1"
 }
 
 group = "se.kodverket.collage"
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")

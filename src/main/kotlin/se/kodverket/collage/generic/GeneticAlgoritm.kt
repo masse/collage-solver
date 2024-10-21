@@ -46,21 +46,23 @@ class GeneticAlgorithm<T>(
             if (useCoroutines) {
                 runBlocking(Dispatchers.Default) {
                     population =
-                        population.concurrently {
+                        population
+                            .concurrently {
+                                val parents = Pair(select(population), select(population))
+                                val child = cross(parents)
+                                val mutatedChild = if (random() <= mutationProbability) mutate(child) else child
+                                score(mutatedChild)
+                            }.sortedBy { it.score }
+                }
+            } else {
+                population =
+                    population
+                        .map {
                             val parents = Pair(select(population), select(population))
                             val child = cross(parents)
                             val mutatedChild = if (random() <= mutationProbability) mutate(child) else child
                             score(mutatedChild)
                         }.sortedBy { it.score }
-                }
-            } else {
-                population =
-                    population.map {
-                        val parents = Pair(select(population), select(population))
-                        val child = cross(parents)
-                        val mutatedChild = if (random() <= mutationProbability) mutate(child) else child
-                        score(mutatedChild)
-                    }.sortedBy { it.score }
             }
 
             if (bestIndividual.score > population.first().score) {
@@ -87,11 +89,12 @@ class GeneticAlgorithm<T>(
     private fun calculateImprovementPercentage(
         oldScore: ScoredIndividual<T>,
         newScore: ScoredIndividual<T>,
-    ): String {
-        return "%.2f".format(100 * (oldScore.score - newScore.score) / oldScore.score)
-    }
+    ): String = "%.2f".format(100 * (oldScore.score - newScore.score) / oldScore.score)
 
     private fun ScoredIndividual<T>.clone() = ScoredIndividual(score, clone(individual))
 }
 
-data class ScoredIndividual<T>(val score: Double, val individual: T)
+data class ScoredIndividual<T>(
+    val score: Double,
+    val individual: T,
+)

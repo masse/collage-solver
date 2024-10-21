@@ -17,7 +17,9 @@ import se.kodverket.collage.layoutsolver.LayoutSolution
 import se.kodverket.collage.layoutsolver.Node
 import se.kodverket.collage.layoutsolver.SlicingDirection.V
 
-open class BinaryTreeImageRenderer(open val solution: LayoutSolution) {
+open class BinaryTreeImageRenderer(
+    open val solution: LayoutSolution,
+) {
     fun render(): BufferedImage {
         print("\nCollage render started..")
         val (renderedImage, duration) =
@@ -40,8 +42,10 @@ open class BinaryTreeImageRenderer(open val solution: LayoutSolution) {
         image.createGraphics().apply {
             drawImage(
                 sourceImage.getScaledInstance(
-                    renderNode.imageNode.dimension.widthAsInt.coerceAtLeast(1),
-                    renderNode.imageNode.dimension.heightAsInt.coerceAtLeast(1),
+                    renderNode.imageNode.dimension.widthAsInt
+                        .coerceAtLeast(1),
+                    renderNode.imageNode.dimension.heightAsInt
+                        .coerceAtLeast(1),
                     Image.SCALE_SMOOTH
                 ),
                 renderNode.xOffset,
@@ -85,4 +89,8 @@ open class BinaryTreeImageRenderer(open val solution: LayoutSolution) {
         }
 }
 
-data class RenderNode(val xOffset: Int, val yOffset: Int, val imageNode: ImageNode)
+data class RenderNode(
+    val xOffset: Int,
+    val yOffset: Int,
+    val imageNode: ImageNode,
+)

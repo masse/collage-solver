@@ -7,13 +7,15 @@ import se.kodverket.collage.generic.ScoredIndividual
 import se.kodverket.collage.layoutsolver.SlicingDirection.H
 import se.kodverket.collage.layoutsolver.SlicingDirection.V
 
-class LayoutSolution(val rootNode: LayoutNode, val config: CollageConfig, var score: Double = 0.0) {
+class LayoutSolution(
+    val rootNode: LayoutNode,
+    val config: CollageConfig,
+    var score: Double = 0.0,
+) {
     private var nodes: Pair<MutableList<LayoutNode>, MutableList<ImageNode>> = Pair(mutableListOf(), mutableListOf())
     private val totalArea: Double = config.targetWidth.toDouble() * config.targetHeight.toDouble() // S
 
-    fun clone(): LayoutSolution {
-        return LayoutSolution(rootNode.clone(), config, score)
-    }
+    fun clone(): LayoutSolution = LayoutSolution(rootNode.clone(), config, score)
 
     fun mutate(): LayoutSolution {
         // Randomly swap either the slicing direction of two Layout nodes or the source image of two random Image nodes.
@@ -201,14 +203,18 @@ fun crossBreedIndividuals(parents: Pair<LayoutSolution, LayoutSolution>): Layout
 
     // Try to find a suitable layout node candidate from the mother's side...
     val motherNode =
-        mother.layoutNodes()
+        mother
+            .layoutNodes()
             .filter { it.imageNodeCount > 3 }
-            .takeUnless { it.isEmpty() }?.random()
+            .takeUnless { it.isEmpty() }
+            ?.random()
 
     // ...and a matching node from the father
     motherNode?.let {
         // Filter nodes with the same imageNodeCount as the mother's node
-        father.layoutNodes().filter { it.imageNodeCount == motherNode.imageNodeCount }
+        father
+            .layoutNodes()
+            .filter { it.imageNodeCount == motherNode.imageNodeCount }
             .takeUnless { it.isEmpty() }
             ?.random()
             ?.let { fatherNode ->
@@ -263,7 +269,10 @@ data class SourceImage(
     val aspectRatio = dimension.width / dimension.height
 }
 
-data class Dimension(val width: Double, val height: Double) {
+data class Dimension(
+    val width: Double,
+    val height: Double,
+) {
     val widthAsInt get() = width.roundToInt()
     val heightAsInt get() = height.roundToInt()
 

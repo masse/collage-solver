@@ -163,4 +163,8 @@ fun toLayoutNode(node: Any): LayoutNode =
  * When the tree is fully populated we can safely convert each partial layout node to a full layout node that is guaranteed
  * to have both a left and right child, which enables stronger typing.
  */
-class PartialLayoutNode(val slicingDirection: SlicingDirection, var left: Any? = null, var right: Any? = null)
+class PartialLayoutNode(
+    val slicingDirection: SlicingDirection,
+    var left: Any? = null,
+    var right: Any? = null,
+)

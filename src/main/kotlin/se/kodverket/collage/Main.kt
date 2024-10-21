@@ -114,7 +114,8 @@ class Collage : CliktCommand() {
 
     private val canvasCoverageWeight by option("-cc", "--canvas-coverage")
         .double()
-        .default(defaults.scoringFactors.canvasCoverage).help(
+        .default(defaults.scoringFactors.canvasCoverage)
+        .help(
             """The weight factor for the canvas coverage fitness score - or how important 
                 |is it that the final image is completely covered by images (without any gaps etc)
             """.trimMargin()
@@ -122,7 +123,8 @@ class Collage : CliktCommand() {
 
     private val relativeAreaCoverageWeight by option("-rac", "--relative-area-coverage")
         .double()
-        .default(defaults.scoringFactors.relativeAreaCoverage).help(
+        .default(defaults.scoringFactors.relativeAreaCoverage)
+        .help(
             """The weight factor for relative image size preservation fitness score - or how important
                 | is it that the each image's relative size is preserved in the output image.
             """.trimMargin()
@@ -130,7 +132,8 @@ class Collage : CliktCommand() {
 
     private val centeredFeatureWeight by option("-cf", "--centered-feature")
         .double()
-        .default(defaults.scoringFactors.centeredFeature).help(
+        .default(defaults.scoringFactors.centeredFeature)
+        .help(
             """The weight factor for featured image centering fitness score - or in other words, how important is it that  
                 |feature images are close to center in the output image.
             """.trimMargin()
