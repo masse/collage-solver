@@ -111,9 +111,9 @@ To create a layout that meets the basic constraints is relatively straight forwa
 - Featured image prominence: Evenly distribute available space but also highlight specific images by allocating them larger sizes.
 - Centered featured images: Optionally position featured images closer to the canvas center (when combined with image prominence).
 
-Now the problem rapidly change from being a rather simple constraint satisfaction task to a complex optimization challenge. Just image the number of possible arrangements and resizing options 
-that is possible with a collage of just 100 images!
-As stated in the paper by Jian Fan [^1]:
+Now the problem rapidly change from being a rather simple constraint satisfaction task to a complex optimization challenge. 
+Just imagine the number of possible combinations of image size and placement that's possible for just 100 images!
+What we have now is as stated in the paper by Jian Fan [^1]:
 
 > "a NP-complete combinatorial optimization problem. An
 > exhaustive search is impractical even for a modest number of photos"
