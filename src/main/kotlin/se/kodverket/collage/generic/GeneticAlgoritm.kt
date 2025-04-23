@@ -17,7 +17,7 @@ import se.kodverket.collage.concurrently
  * @property clone a function which should create a (deep) cloned copy of an individual.
  */
 class GeneticAlgorithm<T>(
-    private var initialPopulation: Collection<T>,
+    private val initialPopulation: Collection<T>,
     val select: (scoredPopulation: Collection<ScoredIndividual<T>>) -> T,
     val cross: (parents: Pair<T, T>) -> T,
     val mutate: (individual: T) -> T,
@@ -25,10 +25,13 @@ class GeneticAlgorithm<T>(
     val clone: (individual: T) -> T,
 ) {
     /**
-     * Returns the best individual found after the given number of generations.
+     * Executes the genetic algorithm over a specified number of generations to optimize a population of individuals.
      *
-     * @param numGenerations number of generations to evolve.
-     * @property mutationProbability a value between 0 and 1, which defines the mutation probability of each child.
+     * @param numGenerations The maximum number of generations to evolve (default is 1000).
+     * @param mutationProbability The probability of mutation for each child during the evolution process (default is 0.1).
+     * @param costThreshold The threshold for the cost value; if the best individual's score is less than or equal to this, evolution stops (default is 0.0).
+     * @param useCoroutines Determines whether to use coroutines for parallelism when evolving the population (default is true).
+     * @return The best individual from the last generation or earlier if the cost threshold is reached, wrapped as a `ScoredIndividual`.
      */
     fun run(
         numGenerations: Int = 1000,
@@ -79,7 +82,7 @@ class GeneticAlgorithm<T>(
             }
 
             if (bestIndividual.score <= costThreshold) {
-                println("CostThreshold reached in generation $generation")
+                println("CostThreshold $costThreshold reached in generation $generation")
                 return bestIndividual
             }
         }
