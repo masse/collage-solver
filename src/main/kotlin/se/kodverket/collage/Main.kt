@@ -121,9 +121,9 @@ class Collage : CliktCommand() {
             """.trimMargin()
         )
 
-    private val relativeAreaCoverageWeight by option("-rac", "--relative-area-coverage")
+    private val relativeImageSizeWeight by option("-riw", "--relative-image-weight")
         .double()
-        .default(defaults.scoringFactors.relativeAreaCoverage)
+        .default(defaults.scoringFactors.relativeImageSize)
         .help(
             """The weight factor for relative image size preservation fitness score - or how important
                 | is it that the each image's relative size is preserved in the output image.
@@ -154,7 +154,7 @@ class Collage : CliktCommand() {
                     mutationProbability = mutationProbability,
                     numGenerations = generations,
                     populationSize = populationSize,
-                    scoringFactors = ScoringFactors(canvasCoverageWeight, relativeAreaCoverageWeight, centeredFeatureWeight)
+                    scoringFactors = ScoringFactors(canvasCoverageWeight, relativeImageSizeWeight, centeredFeatureWeight)
                 )
             renderImage(outputName ?: path.name, CollageRunner().run(config, sourceImages).individual)
         }.also { println("Total execution time: $it") }
