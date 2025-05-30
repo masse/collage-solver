@@ -1,12 +1,20 @@
 package se.kodverket.collage.layoutsolver
 
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random.Default.nextBoolean
 import se.kodverket.collage.generic.ScoredIndividual
 import se.kodverket.collage.layoutsolver.SlicingDirection.H
 import se.kodverket.collage.layoutsolver.SlicingDirection.V
 
+/**
+ * Represents a layout solution for arranging images and nodes within a defined canvas area.
+ * This class evaluates and scores different layout configurations based on various factors,
+ * such as canvas coverage, relative image sizes, and the positioning of images.
+ *
+ * @property rootNode The root layout node representing the hierarchical structure of the layout.
+ * @property config Configuration parameters for creating and evaluating the layout.
+ * @property score The evaluation score of the layout solution, which is updated dynamically.
+ */
 class LayoutSolution(
     val rootNode: LayoutNode,
     val config: CollageConfig,
@@ -47,25 +55,18 @@ class LayoutSolution(
 
         // 3. Now for the actual scoring, we only need to iterate the actual image nodes
         var areaCoveredByImageNodes = 0.0
-        var coverageDiffCostSum = 0.0
-        var offCenterDiffCostSum = 0.0
+        var relativeSizeMismatchCost = 0.0
+        var offCenterMismatchCost = 0.0
 
         imageNodes().forEach { imageNode ->
             // Measure 1: How well is the wanted relative size realized in this layout solution?
             areaCoveredByImageNodes += imageNode.dimension.area
 
-            val desiredRelativeCoverage =
-                imageNode.sourceImage.desiredRelativeWeight / config.desiredRelativeWeightSum.toDouble() // t
-            val relativeAreaActuallyCovered = imageNode.dimension.area / totalArea // s1
-
-            val coverageDiffCost = (relativeAreaActuallyCovered - desiredRelativeCoverage).pow(2)
-            val k = if (relativeAreaActuallyCovered / desiredRelativeCoverage < 0.5) 5.0 else 1.0
-
-            // Measure 2: How well is each image's wanted relative size realized in this layout solution?
-            coverageDiffCostSum += k * coverageDiffCost
+            // Calculate and accumulate relative image size mismatch cost
+            relativeSizeMismatchCost += calculateRelativeImageSizeMismatchCost(imageNode)
 
             // Measure 3: How centered is the feature images (those with relativeWeight > 1)?
-            offCenterDiffCostSum += imageNode.offCenterDistance
+            offCenterMismatchCost += imageNode.offCenterDistance
         }
 
         // Measure 2: How much of target canvas area was not covered by images? (0..1.00, lower is better)
@@ -74,8 +75,8 @@ class LayoutSolution(
         // return a (weighted) cost sum of all the measures
         this.score =
             config.scoringFactors.canvasCoverage * uncoveredCanvasAreaPercentage +
-            config.scoringFactors.relativeAreaCoverage * coverageDiffCostSum +
-            config.scoringFactors.centeredFeature * offCenterDiffCostSum
+            config.scoringFactors.relativeImageSize * relativeSizeMismatchCost +
+            config.scoringFactors.centeredFeature * offCenterMismatchCost
         return ScoredIndividual(this.score, this)
     }
 
@@ -93,9 +94,55 @@ class LayoutSolution(
         return nodes.second
     }
 
+    /**
+     * Calculates the relative image size mismatch cost for a given image node in the layout tree.
+     * This cost is determined based on the difference between the desired relative weight of the image
+     * and its actual relative weight in the layout. A penalty factor is applied depending on the image type
+     * and the weight fulfillment ratio.
+     *
+     * @param imageNode The image node for which the mismatch cost is calculated.
+     * @return A double value representing the mismatch cost, considering penalties for deviations from the desired size.
+     */
+    private fun calculateRelativeImageSizeMismatchCost(imageNode: ImageNode): Double {
+        val desiredRelativeWeight = imageNode.sourceImage.desiredRelativeWeight / config.desiredRelativeWeightSum.toDouble()
+        val actualRelativeWeight = imageNode.dimension.area / totalArea
+        val weightFulfillment = actualRelativeWeight / desiredRelativeWeight
+
+        // Determine a penalty factor based on image type and weight fulfillment ratio.
+        // This will influence how uniform image sizes will be in the layout
+        val penaltyFactor =
+            0.001 *
+                when {
+                    // For feature images we punish proportionally to the desiredRelativeWeight
+                    imageNode.sourceImage.desiredRelativeWeight > 1 && weightFulfillment < 1.0 ->
+                        imageNode.sourceImage.desiredRelativeWeight.toDouble()
+                    // For regular images smaller than what we want
+                    weightFulfillment < 1.0 -> 2.0
+                    // For regular images larger than wanted
+                    weightFulfillment > 1.0 -> weightFulfillment
+                    // Default case
+                    else -> 1.0
+                }
+
+        // Calculate coverage cost
+        val mismatchCost = 1.0 / weightFulfillment
+        return penaltyFactor * mismatchCost
+    }
+
     override fun toString(): String = "$rootNode"
 }
 
+/**
+ * Represents a node in a layout structure, used for computing geometry
+ * and layouts within a hierarchical data structure.
+ *
+ * Its primary responsibilities include
+ * managing dimensions, computing aspect ratios, and cloning itself. Nodes may serve roles as internal
+ * or leaf nodes based on specific implementations.
+ *
+ * @property aspectRatio The aspect ratio of the node.
+ * @property dimension The dimension (width and height) of the node.
+ */
 sealed interface Node {
     var aspectRatio: Double
     var dimension: Dimension
@@ -193,7 +240,7 @@ private fun distributeImagesToNodes(
 
 /**
  * This function performs a crossover operation between two parent solutions and
- * swaps layout directions of a subtree of same size in the two layouts solutions.
+ * swaps layout directions from a subtree of the same size in the two layout solutions.
  *
  * @param parents A pair of parent layout solutions.
  * @return A new LayoutSolution which is the result of the crossover operation.
@@ -257,8 +304,8 @@ fun collectNodes(
 
 data class ScoringFactors(
     val canvasCoverage: Double = 1.0,
-    val relativeAreaCoverage: Double = 10.0,
-    val centeredFeature: Double = 0.5,
+    val relativeImageSize: Double = 1.0,
+    val centeredFeature: Double = 1.0,
 )
 
 data class SourceImage(
