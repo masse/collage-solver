@@ -57,8 +57,11 @@ open class BinaryTreeImageRenderer(
 
             // Scale the image - for rotated images, we need to consider the final orientation
             val scaledImage =
-                if (rotation == Rotation.ROT_CW_90 || rotation == Rotation.ROT_CW_270) {
-                    // For 90° and 270° rotations, the image will be rotated so swap dimensions
+                if (rotation == Rotation.ROT_CW_90 ||
+                    rotation == Rotation.ROT_CW_270 ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_90_CW ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_270_CW
+                ) {
                     sourceImage.getScaledInstance(height, width, Image.SCALE_SMOOTH)
                 } else {
                     sourceImage.getScaledInstance(width, height, Image.SCALE_SMOOTH)
@@ -67,25 +70,52 @@ open class BinaryTreeImageRenderer(
             // Create a transform for rotation and translation operations
             val transform = AffineTransform()
 
-            if (rotation != Rotation.ROT_0) {
-                // Calculate the center point of where we want the rotated image to appear
-                val centerX = renderNode.xOffset.toDouble() + width / 2.0
-                val centerY = renderNode.yOffset.toDouble() + height / 2.0
+            // Calculate the center point of where we want the rotated/mirrored image to appear
+            val centerX = renderNode.xOffset.toDouble() + width / 2.0
+            val centerY = renderNode.yOffset.toDouble() + height / 2.0
 
+            if (rotation == Rotation.ROT_0 && !rotation.mirrored) {
+                // No rotation or mirroring needed, translate to the correct position
+                transform.translate(renderNode.xOffset.toDouble(), renderNode.yOffset.toDouble())
+            } else {
                 // Translate to center point
                 transform.translate(centerX, centerY)
-                // Rotate around this center point
-                transform.rotate(Math.toRadians(rotation.degrees.toDouble()))
+
+                // For orientation values 5 and 7, we need to apply rotation first, then mirroring
+                if (rotation == Rotation.MIRROR_HORIZONTAL_ROT_270_CW ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_90_CW
+                ) {
+                    // Rotate around this center point first
+                    transform.rotate(Math.toRadians(rotation.degrees.toDouble()))
+
+                    // Then apply horizontal mirroring
+                    transform.scale(-1.0, 1.0)
+                } else if (rotation == Rotation.MIRROR_VERTICAL) {
+                    // For orientation value 4 (MIRROR_VERTICAL), we need to apply only vertical mirroring without rotation
+                    // Apply only vertical mirroring (flip along horizontal axis)
+                    transform.scale(1.0, -1.0)
+                } else {
+                    // For other rotations, apply mirroring first if needed
+                    if (rotation.mirrored) {
+                        // Horizontal mirroring (flip along vertical axis)
+                        transform.scale(-1.0, 1.0)
+                    }
+
+                    // Then rotate around this center point
+                    transform.rotate(Math.toRadians(rotation.degrees.toDouble()))
+                }
+
                 // Translate back so the center of the scaled image aligns with our target center point
-                if (rotation == Rotation.ROT_CW_90 || rotation == Rotation.ROT_CW_270) {
+                if (rotation == Rotation.ROT_CW_90 ||
+                    rotation == Rotation.ROT_CW_270 ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_90_CW ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_270_CW
+                ) {
                     // For 90°/270°, the scaled image has swapped dimensions
                     transform.translate(-height / 2.0, -width / 2.0)
                 } else {
                     transform.translate(-width / 2.0, -height / 2.0)
                 }
-            } else {
-                // No rotation needed, translate to the correct position
-                transform.translate(renderNode.xOffset.toDouble(), renderNode.yOffset.toDouble())
             }
 
             // Apply the transform and draw

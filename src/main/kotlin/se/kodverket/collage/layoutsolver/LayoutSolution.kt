@@ -336,9 +336,14 @@ enum class SlicingDirection {
 
 enum class Rotation(
     val degrees: Int,
+    val mirrored: Boolean = false,
 ) {
     ROT_0(0),
     ROT_CW_90(90),
     ROT_180(180),
     ROT_CW_270(270),
+    MIRROR_HORIZONTAL(0, true),
+    MIRROR_VERTICAL(180, true),
+    MIRROR_HORIZONTAL_ROT_270_CW(270, true),
+    MIRROR_HORIZONTAL_ROT_90_CW(90, true),
 }

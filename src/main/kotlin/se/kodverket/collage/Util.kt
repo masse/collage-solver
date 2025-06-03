@@ -9,6 +9,10 @@ import org.apache.commons.imaging.Imaging
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_HORIZONTAL_NORMAL
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_MIRROR_HORIZONTAL
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_270_CW
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_90_CW
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_MIRROR_VERTICAL
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_ROTATE_180
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_ROTATE_270_CW
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.ORIENTATION_VALUE_ROTATE_90_CW
@@ -75,8 +79,12 @@ fun getImageMetadata(imageFile: File): Pair<Dimension, Rotation> {
                     // Convert orientation to a rotation angle
                     when (orientation) {
                         ORIENTATION_VALUE_HORIZONTAL_NORMAL -> Rotation.ROT_0
+                        ORIENTATION_VALUE_MIRROR_HORIZONTAL -> Rotation.MIRROR_HORIZONTAL
                         ORIENTATION_VALUE_ROTATE_180 -> Rotation.ROT_180
+                        ORIENTATION_VALUE_MIRROR_VERTICAL -> Rotation.MIRROR_VERTICAL
+                        ORIENTATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_270_CW -> Rotation.MIRROR_HORIZONTAL_ROT_270_CW
                         ORIENTATION_VALUE_ROTATE_90_CW -> Rotation.ROT_CW_90
+                        ORIENTATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_90_CW -> Rotation.MIRROR_HORIZONTAL_ROT_90_CW
                         ORIENTATION_VALUE_ROTATE_270_CW -> Rotation.ROT_CW_270
                         else -> Rotation.ROT_0
                     }
@@ -87,7 +95,11 @@ fun getImageMetadata(imageFile: File): Pair<Dimension, Rotation> {
 
             // Swap dimensions if rotated 90 or 270 degrees
             val dimension =
-                if (rotation == Rotation.ROT_CW_90 || rotation == Rotation.ROT_CW_270) {
+                if (rotation == Rotation.ROT_CW_90 ||
+                    rotation == Rotation.ROT_CW_270 ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_90_CW ||
+                    rotation == Rotation.MIRROR_HORIZONTAL_ROT_270_CW
+                ) {
                     Dimension(height.toDouble(), width.toDouble())
                 } else {
                     Dimension(width.toDouble(), height.toDouble())
