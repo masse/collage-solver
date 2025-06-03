@@ -1,9 +1,7 @@
 package se.kodverket.collage
 
 import java.awt.Color
-import java.io.File
 import java.nio.file.Path
-import javax.imageio.ImageIO
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.pathString
@@ -28,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import se.kodverket.collage.layoutsolver.CollageConfig
 import se.kodverket.collage.layoutsolver.DEFAULT_IMAGE_RELATIVE_WEIGHT
-import se.kodverket.collage.layoutsolver.Dimension
 import se.kodverket.collage.layoutsolver.FeatureImage
 import se.kodverket.collage.layoutsolver.FeatureImageArgumentParser
 import se.kodverket.collage.layoutsolver.ScoringFactors
@@ -170,34 +167,20 @@ class Collage : CliktCommand() {
                 runBlocking(Dispatchers.Default) {
                     directory.listDirectoryEntries(SOURCE_IMAGES_FILE_PATTERN).concurrently { imagePath ->
                         print(".")
-                        val dimension = getImageDimensions(imagePath.toFile())
+                        val (dimension, rotation) = getImageMetadata(imagePath.toFile())
                         SourceImage(
                             fileName = imagePath.pathString,
                             dimension = dimension,
                             desiredRelativeWeight =
                                 featureImages.find { it.name == imagePath.name }?.relativeWeight
-                                    ?: DEFAULT_IMAGE_RELATIVE_WEIGHT
+                                    ?: DEFAULT_IMAGE_RELATIVE_WEIGHT,
+                            rotation = rotation
                         )
                     }
                 }
             }
         println("\nScanning ${sourceImages.size} images took $duration")
         return sourceImages
-    }
-
-    private fun getImageDimensions(imageFile: File): Dimension {
-        ImageIO.createImageInputStream(imageFile).use { imageInputStream ->
-            val imageReader = ImageIO.getImageReaders(imageInputStream).next()
-            try {
-                imageReader.input = imageInputStream
-
-                val width = imageReader.getWidth(0)
-                val height = imageReader.getHeight(0)
-                return Dimension(width.toDouble(), height.toDouble())
-            } finally {
-                imageReader.dispose()
-            }
-        }
     }
 }
 

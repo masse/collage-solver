@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
+    implementation("org.apache.commons:commons-imaging:1.0-alpha3")
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 }

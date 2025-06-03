@@ -312,6 +312,7 @@ data class SourceImage(
     val fileName: String,
     val dimension: Dimension,
     val desiredRelativeWeight: Int,
+    val rotation: Rotation = Rotation.ROT_0,
 ) {
     val aspectRatio = dimension.width / dimension.height
 }
@@ -331,4 +332,13 @@ data class Dimension(
 enum class SlicingDirection {
     V,
     H,
+}
+
+enum class Rotation(
+    val degrees: Int,
+) {
+    ROT_0(0),
+    ROT_CW_90(90),
+    ROT_180(180),
+    ROT_CW_270(270),
 }
