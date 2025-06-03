@@ -179,7 +179,7 @@ class Collage : CliktCommand() {
                     }
                 }
             }
-        println("\nScanning ${sourceImages.size} images took $duration")
+        println("\nScanned ${sourceImages.size} images in $duration")
         return sourceImages
     }
 }
