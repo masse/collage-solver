@@ -44,7 +44,7 @@ class UtilTest {
     @Test
     fun testGetImageMetadata() {
         // Map each file index to its expected rotation enum
-        // The file name (frog-i.jpg) corresponds to the EXIF orientation value i
+        // The file name (rotated-i.jpg) corresponds to the EXIF orientation value i 1..8
         val expectedRotations =
             mapOf(
                 1 to Rotation.ROT_0,
@@ -57,10 +57,9 @@ class UtilTest {
                 8 to Rotation.ROT_CW_270
             )
 
-        // Test all frog-x.jpg files
         for (i in 1..8) {
-            val frogFile = File("src/test/resources/images/rotated-$i.jpg")
-            val (dimension, rotation) = getImageMetadata(frogFile)
+            val fileWithExifOrientation = File("src/test/resources/images/rotated-$i.jpg")
+            val (dimension, rotation) = getImageMetadata(fileWithExifOrientation)
 
             // Verify that the function returns valid dimensions
             // The actual dimensions depend on the images
