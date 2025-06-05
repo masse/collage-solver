@@ -95,44 +95,53 @@ class LayoutSolution(
     }
 
     /**
-     * Calculates the mismatch cost between the desired and actual (realized) relative image sizes in the layout.
-     * The cost is determined based on the deviation of each image's actual calculated size from its desired size,
-     * and the severity of the penalty depends on whether the image is a feature image or not.
-     * Deviations from the desired weight are penalized more aggressively for featured images, since we specifically
-     * expressed a desire about their relative size in the final image.
+     * Calculates the relative size mismatch cost for an image node based on its size compared
+     * to its desired size and whether it is a feature image or not. The cost is higher for
+     * significant deviations, particularly for undersized feature images as that is a
+     * specifically requested aspect of the finished collage.
      *
-     * @param imageNode The image node for which the mismatch cost is calculated. This includes information
-     *        about the source image, desired weight, and the actual dimensions in the layout.
-     * @return A double representing the calculated mismatch cost for the given image node. Higher values
-     *         indicate a greater mismatch between the desired and actual image sizes.
+     * @param imageNode The image node for which the size mismatch cost is calculated.
+     * @return The calculated size mismatch cost as a double value.
      */
     private fun calculateRelativeImageSizeMismatchCost(imageNode: ImageNode): Double {
+        // Penalty constants - higher values = more severe penalties
+        val featureUndersizedMultiplier = 2.5
+        val featureUndersizedExponent = 2.2
+        val featureOversizedMultiplier = 0.8
+        val featureOversizedExponent = 1.6
+        val nonFeatureUndersizedMultiplier = 0.4
+        val nonFeatureUndersizedExponent = 1.8
+        val nonFeatureOversizedMultiplier = 0.2
+        val nonFeatureOversizedExponent = 1.5
+
+        // Thresholds
+        val featureImageThreshold = 1
+        val perfectSizeRatio = 1.0
+
         val desiredRelativeWeight = imageNode.sourceImage.desiredRelativeWeight / config.desiredRelativeWeightSum.toDouble()
         val actualRelativeWeight = imageNode.dimension.area / totalArea
-        val deviation = actualRelativeWeight / desiredRelativeWeight
+        val desiredSizeRatio = actualRelativeWeight / desiredRelativeWeight
 
-        val isFeatureImage = imageNode.sourceImage.desiredRelativeWeight > 1
+        val isFeatureImage = imageNode.sourceImage.desiredRelativeWeight > featureImageThreshold
 
         return when {
-            // Feature images: Highest penalties for deviations here as we actually requested this specifically for this image
+            // Feature images: Severe penalties for undersized, moderate for oversized
             isFeatureImage -> {
-                if (deviation < 1.0) {
-                    // Undersized feature images - severe penalty, grows rapidly
-                    2.5 * (1.0 / deviation).pow(2.2)
+                if (desiredSizeRatio < perfectSizeRatio) {
+                    featureUndersizedMultiplier * (perfectSizeRatio / desiredSizeRatio).pow(featureUndersizedExponent)
                 } else {
-                    // Oversized feature images - lower penalty than undersized
-                    0.8 * deviation.pow(1.6)
+                    featureOversizedMultiplier * desiredSizeRatio.pow(featureOversizedExponent)
                 }
             }
 
-            // Non-feature images too small: Medium penalty
-            deviation < 1.0 -> {
-                0.4 * (1.0 / deviation).pow(1.8)
+            // Non-feature undersized: Medium penalty
+            desiredSizeRatio < perfectSizeRatio -> {
+                nonFeatureUndersizedMultiplier * (perfectSizeRatio / desiredSizeRatio).pow(nonFeatureUndersizedExponent)
             }
 
-            // Non-feature images too large: Lowest penalty
+            // Non-feature oversized: Lowest penalty
             else -> {
-                0.2 * deviation.pow(1.5)
+                nonFeatureOversizedMultiplier * desiredSizeRatio.pow(nonFeatureOversizedExponent)
             }
         }
     }
