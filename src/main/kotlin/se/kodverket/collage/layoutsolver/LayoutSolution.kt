@@ -1,5 +1,6 @@
 package se.kodverket.collage.layoutsolver
 
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random.Default.nextBoolean
 import se.kodverket.collage.generic.ScoredIndividual
@@ -7,13 +8,12 @@ import se.kodverket.collage.layoutsolver.SlicingDirection.H
 import se.kodverket.collage.layoutsolver.SlicingDirection.V
 
 /**
- * Represents a layout solution for arranging images and nodes within a defined canvas area.
- * This class evaluates and scores different layout configurations based on various factors,
- * such as canvas coverage, relative image sizes, and the positioning of images.
+ * Represents the solution of a layout arrangement problem that organizes and scores a collage
+ * layout based on specified configurations and parameters.
  *
- * @property rootNode The root layout node representing the hierarchical structure of the layout.
- * @property config Configuration parameters for creating and evaluating the layout.
- * @property score The evaluation score of the layout solution, which is updated dynamically.
+ * @property rootNode The root node of the layout, representing the hierarchical structure of the layout.
+ * @property config The configuration for the collage, including dimensions and scoring parameters.
+ * @property score The current score of the layout solution, representing how optimized the solution is.
  */
 class LayoutSolution(
     val rootNode: LayoutNode,
@@ -95,38 +95,46 @@ class LayoutSolution(
     }
 
     /**
-     * Calculates the relative image size mismatch cost for a given image node in the layout tree.
-     * This cost is determined based on the difference between the desired relative weight of the image
-     * and its actual relative weight in the layout. A penalty factor is applied depending on the image type
-     * and the weight fulfillment ratio.
+     * Calculates the mismatch cost between the desired and actual (realized) relative image sizes in the layout.
+     * The cost is determined based on the deviation of each image's actual calculated size from its desired size,
+     * and the severity of the penalty depends on whether the image is a feature image or not.
+     * Deviations from the desired weight are penalized more aggressively for featured images, since we specifically
+     * expressed a desire about their relative size in the final image.
      *
-     * @param imageNode The image node for which the mismatch cost is calculated.
-     * @return A double value representing the mismatch cost, considering penalties for deviations from the desired size.
+     * @param imageNode The image node for which the mismatch cost is calculated. This includes information
+     *        about the source image, desired weight, and the actual dimensions in the layout.
+     * @return A double representing the calculated mismatch cost for the given image node. Higher values
+     *         indicate a greater mismatch between the desired and actual image sizes.
      */
     private fun calculateRelativeImageSizeMismatchCost(imageNode: ImageNode): Double {
         val desiredRelativeWeight = imageNode.sourceImage.desiredRelativeWeight / config.desiredRelativeWeightSum.toDouble()
         val actualRelativeWeight = imageNode.dimension.area / totalArea
-        val weightFulfillment = actualRelativeWeight / desiredRelativeWeight
+        val deviation = actualRelativeWeight / desiredRelativeWeight
 
-        // Determine a penalty factor based on image type and weight fulfillment ratio.
-        // This will influence how uniform image sizes will be in the layout
-        val penaltyFactor =
-            0.001 *
-                when {
-                    // For feature images we punish proportionally to the desiredRelativeWeight
-                    imageNode.sourceImage.desiredRelativeWeight > 1 && weightFulfillment < 1.0 ->
-                        imageNode.sourceImage.desiredRelativeWeight.toDouble()
-                    // For regular images smaller than what we want
-                    weightFulfillment < 1.0 -> 2.0
-                    // For regular images larger than wanted
-                    weightFulfillment > 1.0 -> weightFulfillment
-                    // Default case
-                    else -> 1.0
+        val isFeatureImage = imageNode.sourceImage.desiredRelativeWeight > 1
+
+        return when {
+            // Feature images: Highest penalties for deviations here as we actually requested this specifically for this image
+            isFeatureImage -> {
+                if (deviation < 1.0) {
+                    // Undersized feature images - severe penalty, grows rapidly
+                    2.5 * (1.0 / deviation).pow(2.2)
+                } else {
+                    // Oversized feature images - lower penalty than undersized
+                    0.8 * deviation.pow(1.6)
                 }
+            }
 
-        // Calculate coverage cost
-        val mismatchCost = 1.0 / weightFulfillment
-        return penaltyFactor * mismatchCost
+            // Non-feature images too small: Medium penalty
+            deviation < 1.0 -> {
+                0.4 * (1.0 / deviation).pow(1.8)
+            }
+
+            // Non-feature images too large: Lowest penalty
+            else -> {
+                0.2 * deviation.pow(1.5)
+            }
+        }
     }
 
     override fun toString(): String = "$rootNode"

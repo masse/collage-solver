@@ -39,7 +39,7 @@ class LayoutSolutionTest {
             )
 
         var scoredIndividual = createScoredIndividual(config)
-        scoredIndividual.score shouldBe 0.6963.plusOrMinus(0.001)
+        scoredIndividual.score shouldBe 20.5415.plusOrMinus(0.001)
         ImageIO.write(
             BinaryTreeDebugRenderer(scoredIndividual.individual).render(),
             "png",
@@ -47,7 +47,7 @@ class LayoutSolutionTest {
         )
 
         scoredIndividual = createScoredIndividual(config.copy(targetWidth = 800, targetHeight = 400))
-        scoredIndividual.score shouldBe 0.71968.plusOrMinus(0.00001)
+        scoredIndividual.score shouldBe 22.7173.plusOrMinus(0.001)
         ImageIO.write(
             BinaryTreeDebugRenderer(scoredIndividual.individual).render(),
             "png",
@@ -56,7 +56,7 @@ class LayoutSolutionTest {
 
         scoredIndividual =
             createScoredIndividual(config.copy(targetWidth = 800, targetHeight = 400, scoringFactors = ScoringFactors(2.0, 2.0, 2.0)))
-        scoredIndividual.score shouldBe (2.0 * 0.71968).plusOrMinus(0.00001)
+        scoredIndividual.score shouldBe (2.0 * 22.7173).plusOrMinus(0.001)
 
         ImageIO.write(
             BinaryTreeDebugRenderer(scoredIndividual.individual).render(),
