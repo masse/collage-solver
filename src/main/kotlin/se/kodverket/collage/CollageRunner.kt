@@ -37,7 +37,7 @@ class CollageRunner {
                     costThreshold = 0.00000001
                 )
             }
-        println("Best ${images.size} image collage after ${config.numGenerations} generations and $duration: $result")
+        println("\nBest image collage for ${images.size} images after ${config.numGenerations} generations and $duration was: $result")
         return result
     }
 }

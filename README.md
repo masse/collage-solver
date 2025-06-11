@@ -2,27 +2,24 @@
 
 ## Getting started
 
-You need to have [JDK 21](https://openjdk.org/) or higher installed, then run the installDist task:
+Clone this repository, and navigate to the project in a terminal and run
 
 ```
-./gradlew installDist
+./gradlew build
 ```
 
-When the build step is complete, you can then run the program using the created scripts ```./build/install/collage-solver/bin/collage-solver```
-or ```./build/install/collage-solver/bin/collage-solver.bat``` if you are running Windows.
-To try it out, sample images are included in the ```docs/sample-images``` directory.
-The program offers sensible default values for all options. The only required argument is the path to a directory 
-containing the images you want to use for the collage. To create a sample collage with a featured image, try running:
+When the build step is complete, you can then verify it's working by creating a
+sample collage from the included sample images in the ```docs/sample-images``` directory:
 
 ```
-./build/install/collage-solver/bin/collage-solver docs/sample-images surikat.jpg:8
+./gradlew run --args="docs/sample-images meerkat.jpg:8"
 ```
-
-This command will create a ```sample-images.png``` file in the current directory, looking something like the image below. 
-Due to the nature of genetic algorithms, your results will vary, but an image of a surikat should be prominent.
+This should (after a few seconds) create a ```sample-images.png``` image in current directory 
+looking something like the image below. The program offers sensible default values for all options. 
+The only required argument is the path to a directory containing the images you wish to include in the collage.
 
 ![Sample image output of collage-solver](docs/test-collage-output.png)
-
+Due to the nature of genetic algorithms, your results will vary, but an image of a meerkat should be prominent.
 ## Options
 
 You can customize many aspects of your collages, such as output size (default: 1920x1080). 
@@ -30,34 +27,55 @@ By adjusting weight factors, you can fine-tune the generated image's appearance.
 To see all available options, run:
 
 ```
-./build/install/collage-solver/bin/collage-solver --help
-```
+./gradlew run --args="--help"
 
-```
 Usage: collage [<options>] <path> [<featureimages>]...
 
 Options:
-  -o, --output=<text>                     Image output name without extension, defaults to the directory name of path argument
-  -w, --target-width=<int>                Width of output image (default: 1920)
-  -h, --target-height=<int>               Height of output image (default: 1080)
-  -bw, --border-width=<int>               Width of border framing each image (default: 2)
-  -bc, --border-color=<value>             Border color in the form of a hexadecimal rgb string (like ffffff for white) (default: java.awt.Color[r=255,g=255,b=255])
-  -msf, --max-scale-factor=<float>        Max resize scale factor (1.0 means no larger that original size) (default: 1.0)
-  -pop, --population-size=<int>           Population size, larger means better quality but longer generation time (default: 1000)
-  -gen, --generations=<int>               Number of generation to evolve (default: 500)
-  -mp, --mutation-probability=<float>     Mutation probability (default: 0.25)
-  -cc, --canvas-coverage=<float>          The weight factor for the canvas coverage fitness score - or how important is it that the final image is completely covered by images (without any gaps etc) (default: 1.0)
-  -rac, --relative-area-coverage=<float>  The weight factor for relative image size preservation fitness score - or how important is it that the each image's relative size is preserved in the output image. (default: 10.0)
-  -cf, --centered-feature=<float>         The weight factor for featured image centering fitness score - or in other words, how important is it that
-                                          feature images are close to center in the output image. (default: 0.5)
-  --help                                  Show this message and exit
+  -o, --output=<text>            Image output name without extension, defaults
+                                 to the directory name of path argument
+  -w, --target-width=<int>       Width of output image (default: 1920)
+  -h, --target-height=<int>      Height of output image (default: 1080)
+  -bw, --border-width=<int>      Width of border framing each image (default:2)
+  -bc, --border-color=<value>    Border color in the form of a hexadecimal rgb
+                                 string (like ffffff for white) (default:
+                                 java.awt.Color[r=255,g=255,b=255])
+  -msf, --max-scale-factor=<float>
+                                 Max resize scale factor (1.0 means no larger
+                                 that original size) (default: 1.0)
+  -pop, --population-size=<int>  Population size, larger means better quality
+                                 but longer generation time (default: 1000)
+  -gen, --generations=<int>      Number of generation to evolve (default: 500)
+  -mp, --mutation-probability=<float>
+                                 Mutation probability (default: 0.25)
+  -cc, --canvas-coverage=<float>
+                                 The weight factor for the canvas coverage
+                                 fitness score - or how important is it that
+                                 the final image is completely covered by
+                                 images (without any gaps etc) (default: 1.0)
+  -riw, --relative-image-weight=<float>
+                                 The weight factor for relative image size
+                                 preservation fitness score - or how important
+                                 is it that the each image's relative size is
+                                 preserved in the output image. (default: 1.0)
+  -cf, --centered-feature=<float>
+                                 The weight factor for featured image centering
+                                 fitness score - or in other words, how
+                                 important is it that feature images are close
+                                 to center in the output image. (default: 1.0)
+  --help                         Show this message and exit
 
 Arguments:
-  <path>           Path to a directory containing source images (png and jpeg supported)
-  <featureimages>  Featured image filename(s) and their desired relative size e.g:
+  <path>           Path to a directory containing source images (png and jpeg
+                   supported)
+  <featureimages>  Featured image filename(s) and their desired relative size
+                   e.g:
                    ... sunny_day.jpg:5 ...
-                   The relative size weight determines how large an image should be in the output image compared to other images (The default relative of an image is 1).
-```
+                   The relative size weight determines how large an image
+                   should be in the output image compared to other images (The
+                   default relative of an image is 1).
+                   
+  ```
 
 ### General tips to creating a good-looking collage
 
@@ -102,8 +120,8 @@ with its unique node structure analogous to *genes* or *chromosomes*. Leaf nodes
 ![Sample image output of collage-solver](docs/test-collage-output-gen1-pop1.png)
 
 Image above shows example output after 1 generation using population size of 1 - effectively *not* using the genetic algorithm to illustrate what the naive slice and dice part alone achieves.
-As you can se, no much of the target canvas is used, and relative sizes of the images are varying way too much and our featured surikat image is not even visible...
-This is basically the starting point of a specific individual in the solution that the algorithm may evolve into something more aesthetically pleasing like the first image with the surikat.
+As you can se, no much of the target canvas is used, and relative sizes of the images are varying way too much and our featured meerkat image is not even visible...
+This is basically the starting point of a specific individual in the solution that the algorithm may evolve into something more aesthetically pleasing like the first image with the meerkat.
 
 To create a layout that meets the basic constraints is relatively straight forward but generating an aesthetically pleasing collage requires additional considerations:
 

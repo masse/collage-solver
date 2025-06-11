@@ -45,7 +45,13 @@ class GeneticAlgorithm<T>(
         var winnerCount = 1
 
         for (generation in 1..numGenerations) {
-            print("Evolving generation $generation...\r")
+            print(
+                "\rGeneration $generation produced $winnerCount-th winner - cost ${
+                    "%.4f".format(
+                        population.first().score
+                    )
+                }"
+            )
             if (useCoroutines) {
                 runBlocking(Dispatchers.Default) {
                     population =
@@ -70,8 +76,8 @@ class GeneticAlgorithm<T>(
 
             if (bestIndividual.score > population.first().score) {
                 val improvement = calculateImprovementPercentage(bestIndividual, population.first())
-                println(
-                    "Generation $generation produced $winnerCount-th winner - cost ${
+                print(
+                    "\rGeneration $generation produced $winnerCount-th winner - cost ${
                         "%.4f".format(
                             population.first().score
                         )
