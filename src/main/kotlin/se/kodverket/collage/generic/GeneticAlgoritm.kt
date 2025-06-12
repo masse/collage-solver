@@ -46,11 +46,11 @@ class GeneticAlgorithm<T>(
 
         for (generation in 1..numGenerations) {
             print(
-                "\rGeneration $generation produced $winnerCount-th winner - cost ${
+                "\rGeneration $generation, best score ${
                     "%.4f".format(
-                        population.first().score
+                        bestIndividual.score
                     )
-                }"
+                } (improved $winnerCount times)"
             )
             if (useCoroutines) {
                 runBlocking(Dispatchers.Default) {
@@ -75,14 +75,6 @@ class GeneticAlgorithm<T>(
             }
 
             if (bestIndividual.score > population.first().score) {
-                val improvement = calculateImprovementPercentage(bestIndividual, population.first())
-                print(
-                    "\rGeneration $generation produced $winnerCount-th winner - cost ${
-                        "%.4f".format(
-                            population.first().score
-                        )
-                    } = $improvement% improvement"
-                )
                 bestIndividual = population.first().clone()
                 winnerCount++
             }
@@ -94,11 +86,6 @@ class GeneticAlgorithm<T>(
         }
         return bestIndividual
     }
-
-    private fun calculateImprovementPercentage(
-        oldScore: ScoredIndividual<T>,
-        newScore: ScoredIndividual<T>,
-    ): String = "%.2f".format(100 * (oldScore.score - newScore.score) / oldScore.score)
 
     private fun ScoredIndividual<T>.clone() = ScoredIndividual(score, clone(individual))
 }
