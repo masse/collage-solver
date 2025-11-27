@@ -1,5 +1,11 @@
 # Collage Solver - Creating collage using a genetic algorithm
 
+## Refactoring plan and improvement guide
+
+This repository includes a stepwise refactoring and performance improvement plan that can be used as input to a focused refactoring session with Junie.
+
+- See: REFACTORING_SPEC.md
+
 ## Getting started
 
 Clone this repository, and navigate to the project in a terminal and run
