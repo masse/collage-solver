@@ -37,8 +37,7 @@ fun main() {
             select = ::fromFittestPartSelection,
             cross = ::crossBreedIndividuals,
             mutate = LayoutSolution::mutate,
-            score = LayoutSolution::score,
-            clone = LayoutSolution::clone
+            score = LayoutSolution::score
         )
     val (result, timeTaken) =
         measureTimedValue {

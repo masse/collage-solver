@@ -1,6 +1,6 @@
 package se.kodverket.collage.generic
 
-import java.lang.Math.random
+import kotlin.random.Random
 
 /**
  * Selects an individual randomly from the fittest percentage of a scored population.
@@ -8,4 +8,5 @@ import java.lang.Math.random
 fun <T> fromFittestPartSelection(
     scoredPopulation: Collection<ScoredIndividual<T>>,
     percentage: Double = 0.5,
-): T = scoredPopulation.elementAt((random() * scoredPopulation.size.toDouble() * percentage).toInt()).individual
+    random: Random = Random.Default,
+): T = scoredPopulation.elementAt((random.nextDouble() * scoredPopulation.size.toDouble() * percentage).toInt()).individual

@@ -13,7 +13,7 @@ class LayoutNodeTest {
     fun `computeAspectRatio should calculate the aspect ratio of a node with horizontal slicing direction`() {
         val (imageNode1, imageNode2) = exampleImageNodes()
 
-        val layoutNode = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNode, _) = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).computeAspectRatio()
 
         layoutNode.aspectRatio shouldBe 0.6.plusOrMinus(0.001)
     }
@@ -22,7 +22,7 @@ class LayoutNodeTest {
     fun `computeAspectRatio should calculate the aspect ratio of a node with vertical slicing direction`() {
         val (imageNode1, imageNode2) = exampleImageNodes()
 
-        val layoutNode = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNode, _) = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).computeAspectRatio()
 
         layoutNode.aspectRatio shouldBe 2.5.plusOrMinus(0.001)
     }
@@ -31,10 +31,10 @@ class LayoutNodeTest {
     fun `computeDimensions should scale down to fit when placed in smaller parent with horizontal slicing direction`() {
         val parentDimension = Dimension(200.0, 200.0)
         val (imageNode1, imageNode2) = exampleImageNodes()
-        val layoutNode = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNodeWithAR, _) = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).computeAspectRatio()
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 300, targetHeight = 300)
 
-        val nodeCount = layoutNode.computeDimensions(parentDimension, config, 0.0, 0.0)
+        val (layoutNode, nodeCount) = layoutNodeWithAR.computeDimensions(parentDimension, config, 0.0, 0.0)
 
         nodeCount shouldBe 2
 
@@ -55,10 +55,10 @@ class LayoutNodeTest {
     fun `computeDimensions should scale down to fit when placed in smaller parent with vertical slicing direction`() {
         val parentDimension = Dimension(200.0, 200.0)
         val (imageNode1, imageNode2) = exampleImageNodes()
-        val layoutNode = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNodeWithAR, _) = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).computeAspectRatio()
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 300, targetHeight = 300)
 
-        val nodeCount = layoutNode.computeDimensions(parentDimension, config, 0.0, 0.0)
+        val (layoutNode, nodeCount) = layoutNodeWithAR.computeDimensions(parentDimension, config, 0.0, 0.0)
 
         nodeCount shouldBe 2
 
@@ -79,10 +79,10 @@ class LayoutNodeTest {
     fun `computeDimensions should not scale image nodes beyond original when placed in larger parent with horizontal slicing direction`() {
         val parentDimension = Dimension(800.0, 800.0)
         val (imageNode1, imageNode2) = exampleImageNodes()
-        val layoutNode = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNodeWithAR, _) = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).computeAspectRatio()
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 800, targetHeight = 800)
 
-        val nodeCount = layoutNode.computeDimensions(parentDimension, config, 0.0, 0.0)
+        val (layoutNode, nodeCount) = layoutNodeWithAR.computeDimensions(parentDimension, config, 0.0, 0.0)
 
         nodeCount shouldBe 2
 
@@ -111,10 +111,10 @@ class LayoutNodeTest {
     fun `computeDimensions should not scale image nodes beyond original when placed in larger parent with vertical slicing direction`() {
         val parentDimension = Dimension(1000.0, 1000.0)
         val (imageNode1, imageNode2) = exampleImageNodes()
-        val layoutNode = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNodeWithAR, _) = LayoutNode(slicingDirection = V, left = imageNode1, right = imageNode2).computeAspectRatio()
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 1000, targetHeight = 1000)
 
-        val nodeCount = layoutNode.computeDimensions(parentDimension, config, 0.0, 0.0)
+        val (layoutNode, nodeCount) = layoutNodeWithAR.computeDimensions(parentDimension, config, 0.0, 0.0)
 
         nodeCount shouldBe 2
         layoutNode.aspectRatio shouldBe 2.5.plusOrMinus(0.001)
@@ -139,22 +139,22 @@ class LayoutNodeTest {
     }
 
     @Test
-    fun `it can be cloned`() {
+    fun `it can be copied`() {
         val parentDimension = Dimension(200.0, 200.0)
         val (imageNode1, imageNode2) = exampleImageNodes()
-        val layoutNode = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).also { it.computeAspectRatio() }
+        val (layoutNodeWithAR, _) = LayoutNode(slicingDirection = H, left = imageNode1, right = imageNode2).computeAspectRatio()
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 300, targetHeight = 300)
-        layoutNode.computeDimensions(parentDimension, config, 0.0, 0.0)
+        val (layoutNode, _) = layoutNodeWithAR.computeDimensions(parentDimension, config, 0.0, 0.0)
 
-        val clone = layoutNode.clone()
+        val copy = layoutNode.copy()
 
-        clone shouldBeEqual layoutNode
-        clone shouldNotBeSameInstanceAs layoutNode
+        copy shouldBeEqual layoutNode
+        copy shouldNotBeSameInstanceAs layoutNode
     }
 
     private fun exampleImageNodes(): Pair<ImageNode, ImageNode> {
-        val imageNode1 = ImageNode(SourceImage("sourceImage1.png", Dimension(300.0, 200.0), 1)).also { it.computeAspectRatio() }
-        val imageNode2 = ImageNode(SourceImage("sourceImage2.png", Dimension(400.0, 400.0), 1)).also { it.computeAspectRatio() }
+        val (imageNode1, _) = ImageNode(SourceImage("sourceImage1.png", Dimension(300.0, 200.0), 1)).computeAspectRatio()
+        val (imageNode2, _) = ImageNode(SourceImage("sourceImage2.png", Dimension(400.0, 400.0), 1)).computeAspectRatio()
         return Pair(imageNode1, imageNode2)
     }
 }

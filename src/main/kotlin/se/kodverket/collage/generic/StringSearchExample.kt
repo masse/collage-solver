@@ -39,8 +39,7 @@ fun main() {
                 it.first.mapIndexed { index, s -> if (random() < 0.5) s else it.second[index] }
             },
             mutate = { it.map { gene -> if (random() < 0.1) genePool.random() else gene } },
-            select = ::fromFittestPartSelection,
-            clone = { copyOf(it) }
+            select = ::fromFittestPartSelection
         )
 
     val (result, duration) =
