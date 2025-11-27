@@ -11,8 +11,7 @@ class GeneticAlgorithmTest {
             select = { p -> p.first().individual },
             cross = { p -> Char(min(p.first.code, p.second.code)) },
             mutate = { p -> p.dec() },
-            score = { p -> ScoredIndividual(p.code.toDouble(), p) },
-            clone = { p -> p }
+            score = { p -> ScoredIndividual(p.code.toDouble(), p) }
         )
 
     @Test

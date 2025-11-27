@@ -5,6 +5,7 @@ import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.pathString
+import kotlin.random.Random
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 import com.github.ajalt.clikt.core.CliktCommand
@@ -21,6 +22,7 @@ import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.double
 import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import kotlinx.coroutines.Dispatchers
@@ -137,9 +139,14 @@ class Collage : CliktCommand() {
             """.trimMargin()
         )
 
+    private val seed: Long? by option("--seed")
+        .long()
+        .help("Optional random seed to make runs deterministic across platforms")
+
     override fun run() {
         measureTime {
             val sourceImages = readSourceImages(path, featureImages)
+            val rng: Random = seed?.let { Random(it) } ?: Random.Default
             val config =
                 CollageConfig(
                     targetWidth = targetWidth,
@@ -154,7 +161,7 @@ class Collage : CliktCommand() {
                     populationSize = populationSize,
                     scoringFactors = ScoringFactors(canvasCoverageWeight, relativeImageSizeWeight, centeredFeatureWeight)
                 )
-            renderImage(outputName ?: path.name, CollageRunner().run(config, sourceImages).individual)
+            renderImage(outputName ?: path.name, CollageRunner().run(config, sourceImages, rng).individual)
         }.also { println("Total execution time: $it") }
     }
 

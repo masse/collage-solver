@@ -1,6 +1,7 @@
 package se.kodverket.collage
 
 import kotlin.time.measureTimedValue
+import kotlin.random.Random
 import se.kodverket.collage.generic.GeneticAlgorithm
 import se.kodverket.collage.generic.ScoredIndividual
 import se.kodverket.collage.generic.fromFittestPartSelection
@@ -14,20 +15,21 @@ class CollageRunner {
     fun run(
         config: CollageConfig,
         images: List<SourceImage>,
+        random: Random = Random.Default,
     ): ScoredIndividual<LayoutSolution> {
         require(images.size > 1) { "Must have at least 2 images to create a collage" }
         println("Start running using config $config")
 
-        val population = (1..config.populationSize).map { generateLayoutSolution(images, config) }
+        val population = (1..config.populationSize).map { generateLayoutSolution(images, config, random) }
 
         val algorithm =
             GeneticAlgorithm(
                 population,
-                select = { fromFittestPartSelection(it, 0.25) },
-                cross = ::crossBreedIndividuals,
-                mutate = LayoutSolution::mutate,
+                select = { fromFittestPartSelection(it, 0.25, random) },
+                cross = { parents -> crossBreedIndividuals(parents, random) },
+                mutate = { individual -> individual.mutate(random) },
                 score = LayoutSolution::score,
-                clone = LayoutSolution::clone
+                random = random,
             )
         val (result, duration) =
             measureTimedValue {

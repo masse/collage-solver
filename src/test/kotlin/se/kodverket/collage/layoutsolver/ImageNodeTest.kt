@@ -56,13 +56,13 @@ class ImageNodeTest {
     }
 
     @Test
-    fun `it can be cloned`() {
+    fun `it can be copied`() {
         val sourceImage = SourceImage("sourceImage.png", Dimension(200.0, 200.0), 2)
-        val original = ImageNode(sourceImage).also { it.computeAspectRatio() }
-        val clone = original.clone()
+        val (original, _) = ImageNode(sourceImage).computeAspectRatio()
+        val copy = original.copy()
 
-        clone shouldBeEqual original
-        clone shouldNotBeSameInstanceAs original
+        copy shouldBeEqual original
+        copy shouldNotBeSameInstanceAs original
     }
 
     private fun runComputeDimensionTest(
@@ -75,13 +75,13 @@ class ImageNodeTest {
         currentYOffset: Double = 0.0,
     ) {
         val config = CollageConfig(maxScaleFactor = 1.0, targetWidth = 2000, targetHeight = 2000)
-        val imageNode = ImageNode(sourceImage).also { it.computeAspectRatio() }
+        val (nodeWithAR, _) = ImageNode(sourceImage).computeAspectRatio()
 
-        val result = imageNode.computeDimensions(parentDimension, config, currentXOffset, currentYOffset)
+        val (resultNode, imageCount) = nodeWithAR.computeDimensions(parentDimension, config, currentXOffset, currentYOffset)
 
-        result shouldBe 1
-        imageNode.dimension.width shouldBe expectedWidth.plusOrMinus(0.001)
-        imageNode.dimension.height shouldBe expectedHeight.plusOrMinus(0.001)
-        imageNode.offCenterDistance shouldBe expectedOffCenterDistance.plusOrMinus(0.001)
+        imageCount shouldBe 1
+        resultNode.dimension.width shouldBe expectedWidth.plusOrMinus(0.001)
+        resultNode.dimension.height shouldBe expectedHeight.plusOrMinus(0.001)
+        resultNode.offCenterDistance shouldBe expectedOffCenterDistance.plusOrMinus(0.001)
     }
 }

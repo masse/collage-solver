@@ -1,6 +1,6 @@
 package se.kodverket.collage.generic
 
-import java.lang.Math.random
+import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import se.kodverket.collage.concurrently
@@ -10,11 +10,10 @@ import se.kodverket.collage.concurrently
  *
  * @param T the type of individual.
  * @property initialPopulation a collection of individuals to start optimization.
- * @property score a function which scores the fitness (cost, lower iw better) of an individual.
+ * @property score a function which scores the fitness (cost, lower is better) of an individual.
  * @property cross a function which implements the crossover of two individuals resulting in a new individual.
  * @property mutate a function which mutates a given individual, controlled by mutationProbability
  * @property select a function which implements a selection strategy of an individual from the population.
- * @property clone a function which should create a (deep) cloned copy of an individual.
  */
 class GeneticAlgorithm<T>(
     private val initialPopulation: Collection<T>,
@@ -22,7 +21,7 @@ class GeneticAlgorithm<T>(
     val cross: (parents: Pair<T, T>) -> T,
     val mutate: (individual: T) -> T,
     val score: (individual: T) -> ScoredIndividual<T>,
-    val clone: (individual: T) -> T,
+    val random: Random = Random.Default,
 ) {
     /**
      * Executes the genetic algorithm over a specified number of generations to optimize a population of individuals.
@@ -39,9 +38,9 @@ class GeneticAlgorithm<T>(
         costThreshold: Double = 0.0,
         useCoroutines: Boolean = true,
     ): ScoredIndividual<T> {
-        // Initialize the population and (initially) best individual
+        // Initialize the population and (initially) the best individual
         var population = initialPopulation.map { score(it) }.sortedBy { it.score }
-        var bestIndividual = population.first().clone()
+        var bestIndividual = population.first()
         var winnerCount = 1
 
         for (generation in 1..numGenerations) {
@@ -59,7 +58,7 @@ class GeneticAlgorithm<T>(
                             .concurrently {
                                 val parents = Pair(select(population), select(population))
                                 val child = cross(parents)
-                                val mutatedChild = if (random() <= mutationProbability) mutate(child) else child
+                                val mutatedChild = if (random.nextDouble() <= mutationProbability) mutate(child) else child
                                 score(mutatedChild)
                             }.sortedBy { it.score }
                 }
@@ -69,13 +68,13 @@ class GeneticAlgorithm<T>(
                         .map {
                             val parents = Pair(select(population), select(population))
                             val child = cross(parents)
-                            val mutatedChild = if (random() <= mutationProbability) mutate(child) else child
+                            val mutatedChild = if (random.nextDouble() <= mutationProbability) mutate(child) else child
                             score(mutatedChild)
                         }.sortedBy { it.score }
             }
 
             if (bestIndividual.score > population.first().score) {
-                bestIndividual = population.first().clone()
+                bestIndividual = population.first()
                 winnerCount++
             }
 
@@ -86,8 +85,6 @@ class GeneticAlgorithm<T>(
         }
         return bestIndividual
     }
-
-    private fun ScoredIndividual<T>.clone() = ScoredIndividual(score, clone(individual))
 }
 
 data class ScoredIndividual<T>(

@@ -17,11 +17,11 @@ import kotlin.math.roundToInt
  * @property dimension The dimension of the node.
  * @property aspectRatio The aspect ratio of the node.
  */
-class ImageNode(
-    var sourceImage: SourceImage,
-    var offCenterDistance: Double = 0.0,
-    override var dimension: Dimension = Dimension(0.0, 0.0),
-    override var aspectRatio: Double = 0.0,
+data class ImageNode(
+    val sourceImage: SourceImage,
+    val offCenterDistance: Double = 0.0,
+    override val dimension: Dimension = Dimension(0.0, 0.0),
+    override val aspectRatio: Double = 0.0,
 ) : Node {
     /**
      * Calculates the dimension of an image node in a layout tree.
@@ -30,14 +30,14 @@ class ImageNode(
      * @param config The configuration for the collage.
      * @param currentXOffset The current X offset of the node.
      * @param currentYOffset The current Y offset of the node.
-     * @return The number of image nodes in the subtree rooted at this node.
+     * @return Pair of (new ImageNode with computed dimensions, count of 1)
      */
     override fun computeDimensions(
         parentDimension: Dimension,
         config: CollageConfig,
         currentXOffset: Double,
         currentYOffset: Double,
-    ): Int {
+    ): Pair<ImageNode, Int> {
         // Calculate the width based on the aspect ratio and the height of the parent node
         val calculatedWidth = aspectRatio * parentDimension.height
 
@@ -54,55 +54,31 @@ class ImageNode(
             height = sourceImage.dimension.height * config.maxScaleFactor
         }
 
-        // Set the dimension of the node to the calculated width and height
-        dimension = Dimension(width, height)
+        val newDimension = Dimension(width, height)
 
         // Calculate the off-center distance weight of the image (only applies to feature images with a weight > 1)
-        offCenterDistance =
+        val newOffCenterDistance =
             if (sourceImage.desiredRelativeWeight > 1) {
-                val a = (config.targetWidth.toDouble() / 2.0) - (currentXOffset + (dimension.width / 2.0))
-                val b = (config.targetHeight.toDouble() / 2.0) - (currentYOffset + (dimension.height / 2.0))
-                hypot(a, b) / (2 * max(config.targetWidth, config.targetHeight)).toDouble()
+                val a = (config.targetWidth.toDouble() / 2.0) - (currentXOffset + (newDimension.width / 2.0))
+                val b = (config.targetHeight.toDouble() / 2.0) - (currentYOffset + (newDimension.height / 2.0))
+                // Normalize by half of the longest canvas side so that the maximum possible distance is ~1.0
+                val normalizationDenominator = 2 * max(config.targetWidth, config.targetHeight)
+                hypot(a, b) / normalizationDenominator.toDouble()
             } else {
                 0.0
             }
 
-        // image nodes always contains exactly 1 image nodes by definition.
-        return 1
+        // Return new node with updated values; image nodes always contains exactly 1 image node by definition.
+        return Pair(copy(dimension = newDimension, offCenterDistance = newOffCenterDistance), 1)
     }
 
-    override fun computeAspectRatio(): Double {
-        aspectRatio = sourceImage.aspectRatio
-        return aspectRatio
+    override fun computeAspectRatio(): Pair<ImageNode, Double> {
+        val ar = sourceImage.aspectRatio
+        return Pair(copy(aspectRatio = ar), ar)
     }
-
-    override fun clone(): ImageNode =
-        ImageNode(
-            sourceImage = sourceImage.copy(),
-            offCenterDistance = offCenterDistance,
-            dimension = dimension.copy(),
-            aspectRatio = aspectRatio
-        )
 
     override fun toString(): String =
         "$dimension ≈ ${(100.0 * (dimension.width / sourceImage.dimension.width)).roundToInt()}% of " +
             "${sourceImage.dimension.widthAsInt}x${sourceImage.dimension.heightAsInt} " +
             "(weight: ${sourceImage.desiredRelativeWeight}) @${"%.${3}f".format(sourceImage.aspectRatio)}"
-
-    override fun hashCode(): Int {
-        var result = sourceImage.hashCode()
-        result = 31 * result + offCenterDistance.hashCode()
-        result = 31 * result + dimension.hashCode()
-        result = 31 * result + aspectRatio.hashCode()
-        return result
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ImageNode) return false
-        return sourceImage == other.sourceImage &&
-            offCenterDistance == other.offCenterDistance &&
-            dimension == other.dimension &&
-            aspectRatio == other.aspectRatio
-    }
 }

@@ -10,13 +10,13 @@ import kotlin.math.min
  * recursively compute the dimensions of the node itself, and it's descendant child nodes.
  *
  */
-class LayoutNode(
-    override var aspectRatio: Double = 0.0,
-    override var dimension: Dimension = Dimension(0.0, 0.0),
-    var slicingDirection: SlicingDirection,
-    var imageNodeCount: Int = 0,
-    var left: Node,
-    var right: Node,
+data class LayoutNode(
+    override val aspectRatio: Double = 0.0,
+    override val dimension: Dimension = Dimension(0.0, 0.0),
+    val slicingDirection: SlicingDirection,
+    val imageNodeCount: Int = 0,
+    val left: Node,
+    val right: Node,
 ) : Node {
     override fun toString(): String = "LayoutNode($slicingDirection $dimension @${"%.${3}f".format(aspectRatio)})"
 
@@ -27,112 +27,74 @@ class LayoutNode(
      * @param config The configuration for the collage.
      * @param currentXOffset The current X offset of the node.
      * @param currentYOffset The current Y offset of the node.
-     * @return The number of image nodes in the subtree rooted at this node.
+     * @return Pair of (new LayoutNode with computed dimensions, count of image nodes in subtree)
      */
     override fun computeDimensions(
         parentDimension: Dimension,
         config: CollageConfig,
         currentXOffset: Double,
         currentYOffset: Double,
-    ): Int {
+    ): Pair<LayoutNode, Int> {
         // Calculate the width based on the aspect ratio and the height of the parent node
         val calculatedWidth = aspectRatio * parentDimension.height
 
         // If the calculated width exceeds the width of the parent node, cap it
         val width = min(calculatedWidth, parentDimension.width)
         val height = width / aspectRatio
-
-        // Set the dimension of the node to the calculated width and height
-        dimension = Dimension(width, height)
-
-        // Initialize the count of image nodes in the subtree to 0
-        imageNodeCount = 0
+        val newDimension = Dimension(width, height)
 
         // Calculate the dimension of the left and right child nodes based on the slicing direction
-        if (slicingDirection == SlicingDirection.V) {
+        val (newLeft, leftCount) = if (slicingDirection == SlicingDirection.V) {
             // If the slicing direction is vertical, calculate the dimension of the left child node
-            // and add it to the count of image nodes
-            imageNodeCount = left.computeDimensions(dimension, config, currentXOffset, currentYOffset)
-
-            // Calculate the dimension of the right child node and add it to the count of image nodes
-            imageNodeCount +=
-                right.computeDimensions(
-                    dimension,
-                    config,
-                    currentXOffset + left.dimension.width,
-                    currentYOffset
-                )
+            left.computeDimensions(newDimension, config, currentXOffset, currentYOffset)
         } else {
             // If the slicing direction is horizontal, calculate the dimension of the left child node
-            // and add it to the count of image nodes
-            imageNodeCount = left.computeDimensions(dimension, config, currentXOffset, currentYOffset)
-
-            // Calculate the dimension of the right child node and add it to the count of image nodes
-            imageNodeCount +=
-                right.computeDimensions(
-                    dimension,
-                    config,
-                    currentXOffset,
-                    currentYOffset + left.dimension.height
-                )
+            left.computeDimensions(newDimension, config, currentXOffset, currentYOffset)
         }
 
-        // Return the count of image nodes in the subtree rooted at this node
-        return imageNodeCount
+        val (xOffset, yOffset) = if (slicingDirection == SlicingDirection.V) {
+            Pair(currentXOffset + newLeft.dimension.width, currentYOffset)
+        } else {
+            Pair(currentXOffset, currentYOffset + newLeft.dimension.height)
+        }
+
+        // Calculate the dimension of the right child node
+        val (newRight, rightCount) = right.computeDimensions(newDimension, config, xOffset, yOffset)
+
+        val totalCount = leftCount + rightCount
+
+        // Return new node with updated values
+        return Pair(
+            copy(
+                dimension = newDimension,
+                imageNodeCount = totalCount,
+                left = newLeft,
+                right = newRight
+            ),
+            totalCount
+        )
     }
 
     /**
      * Recursively computes the aspect ratio of the node which is based on the aspect ratios of the left and right child nodes.
      *
-     * @return The computed aspect ratio of the node.
+     * @return Pair of (new LayoutNode with computed aspect ratio, the aspect ratio value)
      */
-    override fun computeAspectRatio(): Double {
+    override fun computeAspectRatio(): Pair<LayoutNode, Double> {
         // Compute the aspect ratios of the left and right child nodes
-        val leftAR = left.computeAspectRatio()
-        val rightAR = right.computeAspectRatio()
+        val (newLeft, leftAR) = left.computeAspectRatio()
+        val (newRight, rightAR) = right.computeAspectRatio()
 
         // If the slicing direction is vertical, calculate the aspect ratio as the sum of the left and right aspect ratios
-        if (slicingDirection == SlicingDirection.V) {
-            aspectRatio = leftAR + rightAR
-            return aspectRatio
+        val newAspectRatio = if (slicingDirection == SlicingDirection.V) {
+            leftAR + rightAR
         } else {
             // If the slicing direction is horizontal, calculate the aspect ratio as the product of the left and right aspect ratios
             // divided by their sum
-            aspectRatio = leftAR * rightAR / (leftAR + rightAR)
-            return aspectRatio
+            leftAR * rightAR / (leftAR + rightAR)
         }
-    }
 
-    override fun clone(): LayoutNode =
-        LayoutNode(
-            slicingDirection = slicingDirection,
-            aspectRatio = aspectRatio,
-            dimension = dimension.copy(),
-            imageNodeCount = imageNodeCount,
-            left = left.clone(),
-            right = right.clone()
-        )
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is LayoutNode) return false
-
-        return aspectRatio == other.aspectRatio &&
-            dimension == other.dimension &&
-            slicingDirection == other.slicingDirection &&
-            imageNodeCount == other.imageNodeCount &&
-            left == other.left &&
-            right == other.right
-    }
-
-    override fun hashCode(): Int {
-        var result = aspectRatio.hashCode()
-        result = 31 * result + dimension.hashCode()
-        result = 31 * result + slicingDirection.hashCode()
-        result = 31 * result + imageNodeCount
-        result = 31 * result + left.hashCode()
-        result = 31 * result + right.hashCode()
-        return result
+        return Pair(copy(aspectRatio = newAspectRatio, left = newLeft, right = newRight), newAspectRatio)
     }
 }
 
@@ -148,8 +110,20 @@ fun toLayoutNode(node: Any): LayoutNode =
         LayoutNode(
             slicingDirection = node.slicingDirection,
             // Recursively convert the left and right children to a LayoutNode nodes unless it's an image node - then it can be added as is.
-            left = if (node.left is ImageNode) node.left!! as ImageNode else toLayoutNode(node.left!!),
-            right = if (node.right is ImageNode) node.right!! as ImageNode else toLayoutNode(node.right!!)
+            left = node.left.let { child ->
+                when (child) {
+                    is ImageNode -> child
+                    is PartialLayoutNode -> toLayoutNode(child)
+                    else -> throw IllegalArgumentException("Invalid left child type: $child")
+                }
+            },
+            right = node.right.let { child ->
+                when (child) {
+                    is ImageNode -> child
+                    is PartialLayoutNode -> toLayoutNode(child)
+                    else -> throw IllegalArgumentException("Invalid right child type: $child")
+                }
+            }
         )
     } else {
         // Throw an exception if the node is not a partial layout node
