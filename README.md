@@ -1,5 +1,7 @@
 # Collage Solver - Creating collage using a genetic algorithm
 
+UPDATE: An improved and more accessible free online version of this tool can be found at [collage-studio.app](https://collage-studio.app).
+
 ## Getting started
 
 Clone this repository, and navigate to the project in a terminal and run
